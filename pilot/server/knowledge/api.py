@@ -4,13 +4,15 @@ import tempfile
 
 from fastapi import APIRouter, File, UploadFile, Form
 
-from langchain.embeddings import HuggingFaceEmbeddings
-
 from pilot.configs.config import Config
-from pilot.configs.model_config import LLM_MODEL_CONFIG, KNOWLEDGE_UPLOAD_ROOT_PATH
+from pilot.configs.model_config import (
+    EMBEDDING_MODEL_CONFIG,
+    KNOWLEDGE_UPLOAD_ROOT_PATH,
+)
 
 from pilot.openapi.api_view_model import Result
 from pilot.embedding_engine.embedding_engine import EmbeddingEngine
+from pilot.embedding_engine.embedding_factory import EmbeddingFactory
 
 from pilot.server.knowledge.service import KnowledgeService
 from pilot.server.knowledge.request.request import (
@@ -28,8 +30,6 @@ from pilot.server.knowledge.request.request import KnowledgeSpaceRequest
 CFG = Config()
 router = APIRouter()
 
-
-embeddings = HuggingFaceEmbeddings(model_name=LLM_MODEL_CONFIG[CFG.EMBEDDING_MODEL])
 
 knowledge_space_service = KnowledgeService()
 
@@ -181,8 +181,13 @@ def document_list(space_name: str, query_request: ChunkQueryRequest):
 @router.post("/knowledge/{vector_name}/query")
 def similar_query(space_name: str, query_request: KnowledgeQueryRequest):
     print(f"Received params: {space_name}, {query_request}")
+    embedding_factory = CFG.SYSTEM_APP.get_componet(
+        "embedding_factory", EmbeddingFactory
+    )
     client = EmbeddingEngine(
-        model_name=embeddings, vector_store_config={"vector_store_name": space_name}
+        model_name=EMBEDDING_MODEL_CONFIG[CFG.EMBEDDING_MODEL],
+        vector_store_config={"vector_store_name": space_name},
+        embedding_factory=embedding_factory,
     )
     docs = client.similar_search(query_request.query, query_request.top_k)
     res = [

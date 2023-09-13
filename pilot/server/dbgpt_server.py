@@ -7,9 +7,15 @@ ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fi
 sys.path.append(ROOT_PATH)
 import signal
 from pilot.configs.config import Config
-from pilot.configs.model_config import LLM_MODEL_CONFIG
+from pilot.configs.model_config import LLM_MODEL_CONFIG, EMBEDDING_MODEL_CONFIG
+from pilot.componet import SystemApp
 
-from pilot.server.base import server_init, WebWerverParameters
+from pilot.server.base import (
+    server_init,
+    WebWerverParameters,
+    _create_model_start_listener,
+)
+from pilot.server.componet_configs import initialize_componets
 
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, applications
@@ -23,7 +29,7 @@ from pilot.openapi.api_v1.api_v1 import router as api_v1
 from pilot.openapi.base import validation_exception_handler
 from pilot.openapi.api_v1.editor.api_editor_v1 import router as api_editor_route_v1
 from pilot.commands.disply_type.show_chart_gen import static_message_img_path
-from pilot.model.worker.manager import initialize_worker_manager_in_client
+from pilot.model.cluster import initialize_worker_manager_in_client
 from pilot.utils.utils import setup_logging, logging_str_to_uvicorn_level
 from pilot.base_modules.meta_data.meta_data import ddl_init_and_upgrade
 
@@ -50,6 +56,8 @@ def swagger_monkey_patch(*args, **kwargs):
 applications.get_swagger_ui_html = swagger_monkey_patch
 
 app = FastAPI()
+system_app = SystemApp(app)
+
 origins = ["*"]
 
 # 添加跨域中间件
@@ -97,13 +105,24 @@ def initialize_app(param: WebWerverParameters = None, args: List[str] = None):
         param = WebWerverParameters(**vars(parser.parse_args(args=args)))
 
     setup_logging(logging_level=param.log_level)
-    server_init(param)
+    # Before start
+    system_app.before_start()
+
+    server_init(param, system_app)
+    model_start_listener = _create_model_start_listener(system_app)
+    initialize_componets(system_app, CFG.EMBEDDING_MODEL)
 
     model_path = LLM_MODEL_CONFIG[CFG.LLM_MODEL]
     if not param.light:
         print("Model Unified Deployment Mode!")
         initialize_worker_manager_in_client(
-            app=app, model_name=CFG.LLM_MODEL, model_path=model_path
+            app=app,
+            model_name=CFG.LLM_MODEL,
+            model_path=model_path,
+            local_port=param.port,
+            embedding_model_name=CFG.EMBEDDING_MODEL,
+            embedding_model_path=EMBEDDING_MODEL_CONFIG[CFG.EMBEDDING_MODEL],
+            start_listener=model_start_listener,
         )
 
         CFG.NEW_SERVER_MODE = True
@@ -115,6 +134,8 @@ def initialize_app(param: WebWerverParameters = None, args: List[str] = None):
             model_path=model_path,
             run_locally=False,
             controller_addr=CFG.MODEL_SERVER,
+            local_port=param.port,
+            start_listener=model_start_listener,
         )
         CFG.SERVER_LIGHT_MODE = True
 

@@ -96,16 +96,32 @@ def get_llm_model_adapter(model_name: str, model_path: str) -> BaseLLMAdaper:
 
 def _dynamic_model_parser() -> Callable[[None], List[Type]]:
     from pilot.utils.parameter_utils import _SimpleArgParser
+    from pilot.model.parameter import EmbeddingModelParameters, WorkerType
 
-    pre_args = _SimpleArgParser("model_name", "model_path")
+    pre_args = _SimpleArgParser("model_name", "model_path", "worker_type")
     pre_args.parse()
     model_name = pre_args.get("model_name")
     model_path = pre_args.get("model_path")
+    worker_type = pre_args.get("worker_type")
     if model_name is None:
         return None
+    if worker_type == WorkerType.TEXT2VEC:
+        return [EmbeddingModelParameters]
+
     llm_adapter = get_llm_model_adapter(model_name, model_path)
     param_class = llm_adapter.model_param_class()
     return [param_class]
+
+
+def _parse_model_param_class(model_name: str, model_path: str) -> ModelParameters:
+    try:
+        llm_adapter = get_llm_model_adapter(model_name, model_path)
+        return llm_adapter.model_param_class()
+    except Exception as e:
+        logger.warn(
+            f"Parse model parameters with model name {model_name} and model {model_path} failed {str(e)}, return `ModelParameters`"
+        )
+        return ModelParameters
 
 
 # TODO support cpu? for practise we support gpt4all or chatglm-6b-int4?

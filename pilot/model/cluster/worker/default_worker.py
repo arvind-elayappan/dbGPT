@@ -7,7 +7,7 @@ from pilot.model.adapter import get_llm_model_adapter, BaseLLMAdaper
 from pilot.model.base import ModelOutput
 from pilot.model.loader import ModelLoader, _get_model_real_path
 from pilot.model.parameter import ModelParameters
-from pilot.model.worker.base import ModelWorker
+from pilot.model.cluster.worker_base import ModelWorker
 from pilot.server.chat_adapter import get_llm_chat_adapter, BaseChatAdpter
 from pilot.utils.model_utils import _clear_torch_cache
 from pilot.utils.parameter_utils import EnvArgumentParser
@@ -82,6 +82,7 @@ class DefaultModelWorker(ModelWorker):
 
     def stop(self) -> None:
         if not self.model:
+            logger.warn("Model has been stopped!!")
             return
         del self.model
         del self.tokenizer
@@ -98,23 +99,24 @@ class DefaultModelWorker(ModelWorker):
                 params, self.ml.model_path, prompt_template=self.ml.prompt_template
             )
 
+            previous_response = ""
+            print("stream output:\n")
             for output in self.generate_stream_func(
                 self.model, self.tokenizer, params, get_device(), self.context_len
             ):
                 # Please do not open the output in production!
                 # The gpt4all thread shares stdout with the parent process,
                 # and opening it may affect the frontend output.
-                if "windows" in platform.platform().lower():
-                    # Do not print the model output, because it may contain Emoji, there is a problem with the GBK encoding
-                    pass
-                else:
-                    print("output: ", output)
+                incremental_output = output[len(previous_response) :]
+                # print("output: ", output)
+                print(incremental_output, end="", flush=True)
+                previous_response = output
                 # return some model context to dgt-server
                 model_output = ModelOutput(
                     text=output, error_code=0, model_context=model_context
                 )
                 yield model_output
-
+            print(f"\n\nfull stream output:\n{previous_response}")
         except torch.cuda.CudaError:
             model_output = ModelOutput(
                 text="**GPU OutOfMemory, Please Refresh.**", error_code=0

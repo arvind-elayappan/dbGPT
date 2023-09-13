@@ -16,7 +16,7 @@ from langchain.vectorstores import Chroma
 
 from pilot.configs.model_config import (
     DATASETS_DIR,
-    LLM_MODEL_CONFIG,
+    EMBEDDING_MODEL_CONFIG,
     VECTORE_PATH,
 )
 
@@ -39,12 +39,16 @@ class KnownLedge2Vector:
     """
 
     embeddings: object = None
-    model_name = LLM_MODEL_CONFIG["sentence-transforms"]
+    model_name = EMBEDDING_MODEL_CONFIG["sentence-transforms"]
 
     def __init__(self, model_name=None) -> None:
         if not model_name:
             # use default embedding model
-            self.embeddings = HuggingFaceEmbeddings(model_name=self.model_name)
+            from pilot.embedding_engine.embedding_factory import DefaultEmbeddingFactory
+
+            self.embeddings = DefaultEmbeddingFactory().create(
+                model_name=self.model_name
+            )
 
     def init_vector_store(self):
         persist_dir = os.path.join(VECTORE_PATH, ".vectordb")

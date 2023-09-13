@@ -33,25 +33,27 @@ class ModelControllerParameters(BaseParameters):
 
 
 @dataclass
-class ModelWorkerParameters(BaseParameters):
+class BaseModelParameters(BaseParameters):
     model_name: str = field(metadata={"help": "Model name", "tags": "fixed"})
     model_path: str = field(metadata={"help": "Model path", "tags": "fixed"})
+
+
+@dataclass
+class ModelWorkerParameters(BaseModelParameters):
     worker_type: Optional[str] = field(
         default=None,
         metadata={"valid_values": WorkerType.values(), "help": "Worker type"},
     )
     worker_class: Optional[str] = field(
         default=None,
-        metadata={
-            "help": "Model worker class, pilot.model.worker.default_worker.DefaultModelWorker"
-        },
+        metadata={"help": "Model worker class, pilot.model.cluster.DefaultModelWorker"},
     )
     host: Optional[str] = field(
         default="0.0.0.0", metadata={"help": "Model worker deploy host"}
     )
 
     port: Optional[int] = field(
-        default=8000, metadata={"help": "Model worker deploy port"}
+        default=8001, metadata={"help": "Model worker deploy port"}
     )
     daemon: Optional[bool] = field(
         default=False, metadata={"help": "Run Model Worker in background"}
@@ -84,9 +86,7 @@ class ModelWorkerParameters(BaseParameters):
 
 
 @dataclass
-class EmbeddingModelParameters(BaseParameters):
-    model_name: str = field(metadata={"help": "Model name", "tags": "fixed"})
-    model_path: str = field(metadata={"help": "Model path", "tags": "fixed"})
+class EmbeddingModelParameters(BaseModelParameters):
     device: Optional[str] = field(
         default=None,
         metadata={
@@ -112,12 +112,6 @@ class EmbeddingModelParameters(BaseParameters):
         if encode_kwargs:
             kwargs["encode_kwargs"] = encode_kwargs
         return kwargs
-
-
-@dataclass
-class BaseModelParameters(BaseParameters):
-    model_name: str = field(metadata={"help": "Model name", "tags": "fixed"})
-    model_path: str = field(metadata={"help": "Model path", "tags": "fixed"})
 
 
 @dataclass

@@ -59,6 +59,12 @@ class ModelRegistry(ABC):
         """
 
     @abstractmethod
+    def sync_get_all_instances(
+        self, model_name: str, healthy_only: bool = False
+    ) -> List[ModelInstance]:
+        """Fetch all instances of a given model. Optionally, fetch only the healthy instances."""
+
+    @abstractmethod
     async def get_all_model_instances(self) -> List[ModelInstance]:
         """
         Fetch all instances of all models
@@ -164,6 +170,11 @@ class EmbeddedModelRegistry(ModelRegistry):
     async def get_all_instances(
         self, model_name: str, healthy_only: bool = False
     ) -> List[ModelInstance]:
+        return self.sync_get_all_instances(model_name, healthy_only)
+
+    def sync_get_all_instances(
+        self, model_name: str, healthy_only: bool = False
+    ) -> List[ModelInstance]:
         instances = self.registry[model_name]
         if healthy_only:
             instances = [ins for ins in instances if ins.healthy == True]
@@ -178,47 +189,11 @@ class EmbeddedModelRegistry(ModelRegistry):
             instance.model_name, instance.host, instance.port, healthy_only=False
         )
         if not exist_ins:
-            return False
+            # register new install from heartbeat
+            await self.register_instance(instance)
+            return True
 
         ins = exist_ins[0]
         ins.last_heartbeat = datetime.now()
         ins.healthy = True
         return True
-
-
-from pilot.utils.api_utils import _api_remote as api_remote
-
-
-class ModelRegistryClient(ModelRegistry):
-    def __init__(self, base_url: str) -> None:
-        self.base_url = base_url
-
-    @api_remote(path="/api/controller/models", method="POST")
-    async def register_instance(self, instance: ModelInstance) -> bool:
-        pass
-
-    @api_remote(path="/api/controller/models", method="DELETE")
-    async def deregister_instance(self, instance: ModelInstance) -> bool:
-        pass
-
-    @api_remote(path="/api/controller/models")
-    async def get_all_instances(
-        self, model_name: str, healthy_only: bool = False
-    ) -> List[ModelInstance]:
-        pass
-
-    @api_remote(path="/api/controller/models")
-    async def get_all_model_instances(self) -> List[ModelInstance]:
-        pass
-
-    @api_remote(path="/api/controller/models")
-    async def select_one_health_instance(self, model_name: str) -> ModelInstance:
-        instances = await self.get_all_instances(model_name, healthy_only=True)
-        instances = [i for i in instances if i.enabled]
-        if not instances:
-            return None
-        return random.choice(instances)
-
-    @api_remote(path="/api/controller/heartbeat", method="POST")
-    async def send_heartbeat(self, instance: ModelInstance) -> bool:
-        pass

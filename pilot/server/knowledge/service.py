@@ -5,7 +5,10 @@ from datetime import datetime
 from pilot.vector_store.connector import VectorStoreConnector
 
 from pilot.configs.config import Config
-from pilot.configs.model_config import LLM_MODEL_CONFIG, KNOWLEDGE_UPLOAD_ROOT_PATH
+from pilot.configs.model_config import (
+    EMBEDDING_MODEL_CONFIG,
+    KNOWLEDGE_UPLOAD_ROOT_PATH,
+)
 from pilot.logs import logger
 from pilot.server.knowledge.chunk_db import (
     DocumentChunkEntity,
@@ -151,6 +154,7 @@ class KnowledgeService:
 
     def sync_knowledge_document(self, space_name, doc_ids):
         from pilot.embedding_engine.embedding_engine import EmbeddingEngine
+        from pilot.embedding_engine.embedding_factory import EmbeddingFactory
         from langchain.text_splitter import (
             RecursiveCharacterTextSplitter,
             SpacyTextSplitter,
@@ -201,16 +205,20 @@ class KnowledgeService:
                         chunk_size=chunk_size,
                         chunk_overlap=chunk_overlap,
                     )
+            embedding_factory = CFG.SYSTEM_APP.get_componet(
+                "embedding_factory", EmbeddingFactory
+            )
             client = EmbeddingEngine(
                 knowledge_source=doc.content,
                 knowledge_type=doc.doc_type.upper(),
-                model_name=LLM_MODEL_CONFIG[CFG.EMBEDDING_MODEL],
+                model_name=EMBEDDING_MODEL_CONFIG[CFG.EMBEDDING_MODEL],
                 vector_store_config={
                     "vector_store_name": space_name,
                     "vector_store_type": CFG.VECTOR_STORE_TYPE,
                     "chroma_persist_path": KNOWLEDGE_UPLOAD_ROOT_PATH,
                 },
                 text_splitter=text_splitter,
+                embedding_factory=embedding_factory,
             )
             chunk_docs = client.read()
             # update document status
@@ -341,7 +349,7 @@ class KnowledgeService:
                 "topk": CFG.KNOWLEDGE_SEARCH_TOP_SIZE,
                 "recall_score": 0.0,
                 "recall_type": "TopK",
-                "model": LLM_MODEL_CONFIG[CFG.EMBEDDING_MODEL].rsplit("/", 1)[-1],
+                "model": EMBEDDING_MODEL_CONFIG[CFG.EMBEDDING_MODEL].rsplit("/", 1)[-1],
                 "chunk_size": CFG.KNOWLEDGE_CHUNK_SIZE,
                 "chunk_overlap": CFG.KNOWLEDGE_CHUNK_OVERLAP,
             },
