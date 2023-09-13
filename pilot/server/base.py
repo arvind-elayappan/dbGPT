@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 from pilot.configs.config import Config
 from pilot.utils.parameter_utils import BaseParameters
-
+from pilot.base_modules.meta_data.meta_data import ddl_init_and_upgrade
 
 ROOT_PATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(ROOT_PATH)
@@ -38,6 +38,8 @@ def server_init(args):
     # init connect manage
     conn_manage = ConnectManager()
     cfg.LOCAL_DB_MANAGE = conn_manage
+
+    ddl_init_and_upgrade()
 
     # load_native_plugins(cfg)
     signal.signal(signal.SIGINT, signal_handler)

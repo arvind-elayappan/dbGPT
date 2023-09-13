@@ -25,6 +25,8 @@ from pilot.openapi.api_v1.editor.api_editor_v1 import router as api_editor_route
 from pilot.commands.disply_type.show_chart_gen import static_message_img_path
 from pilot.model.worker.manager import initialize_worker_manager_in_client
 from pilot.utils.utils import setup_logging, logging_str_to_uvicorn_level
+from pilot.base_modules.meta_data.meta_data import ddl_init_and_upgrade
+
 
 static_file_path = os.path.join(os.getcwd(), "server/static")
 
@@ -61,12 +63,9 @@ app.add_middleware(
 
 
 app.include_router(api_v1, prefix="/api")
-app.include_router(knowledge_router, prefix="/api")
 app.include_router(api_editor_route_v1, prefix="/api")
 
-# app.include_router(api_v1)
 app.include_router(knowledge_router)
-# app.include_router(api_editor_route_v1)
 
 
 def mount_static_files(app):
@@ -139,6 +138,9 @@ def run_webserver(param: WebWerverParameters = None):
     param = initialize_app(param)
     run_uvicorn(param)
 
+# @app.on_event("startup")
+# def startup_event():
+#     ddl_init_and_upgrade()
 
 if __name__ == "__main__":
     run_webserver()

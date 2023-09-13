@@ -39,6 +39,7 @@ class ChatExcel(BaseChat):
             chat_mode=chat_mode,
             chat_session_id=chat_session_id,
             current_user_input=user_input,
+
             select_param=select_param,
         )
 

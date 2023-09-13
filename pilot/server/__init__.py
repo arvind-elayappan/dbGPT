@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+import pilot.base_modules.agent
 
 from dotenv import load_dotenv
 

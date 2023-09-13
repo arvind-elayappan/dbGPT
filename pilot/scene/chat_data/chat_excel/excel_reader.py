@@ -74,7 +74,7 @@ class ExcelReader:
                 self.df[column_name] = pd.to_numeric(self.df[column_name])
                 self.df[column_name] = self.df[column_name].fillna(0)
             except Exception as e:
-                print("transfor column error！" + column_name)
+                print("none-number column！" + column_name)
 
         self.df = self.df.rename(columns=lambda x: x.strip().replace(" ", "_"))
 

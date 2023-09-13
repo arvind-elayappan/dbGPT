@@ -28,6 +28,9 @@ class ChatExcelOutputParser(BaseOutputParser):
         clean_str = super().parse_prompt_response(model_out_text)
         print("clean prompt response:", clean_str)
         response = json.loads(clean_str)
+        sql = ""
+        thoughts = ""
+        display = ""
         for key in sorted(response):
             if key.strip() == "sql":
                 sql = response[key]
