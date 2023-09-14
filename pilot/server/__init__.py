@@ -1,7 +1,7 @@
 import os
 import random
 import sys
-import pilot.base_modules.agent
+from pilot.base_modules.agent import PluginPromptGenerator
 
 from dotenv import load_dotenv
 

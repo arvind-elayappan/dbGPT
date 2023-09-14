@@ -3,7 +3,7 @@ import json
 
 import requests
 
-from pilot.commands.command_mange import command
+from pilot.base_modules.agent.commands.command_mange import command
 from pilot.configs.config import Config
 
 CFG = Config()

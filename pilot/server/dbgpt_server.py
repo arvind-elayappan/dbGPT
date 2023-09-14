@@ -28,11 +28,9 @@ from pilot.server.knowledge.api import router as knowledge_router
 from pilot.openapi.api_v1.api_v1 import router as api_v1
 from pilot.openapi.base import validation_exception_handler
 from pilot.openapi.api_v1.editor.api_editor_v1 import router as api_editor_route_v1
-from pilot.commands.disply_type.show_chart_gen import static_message_img_path
+from pilot.base_modules.agent import static_message_img_path
 from pilot.model.cluster import initialize_worker_manager_in_client
 from pilot.utils.utils import setup_logging, logging_str_to_uvicorn_level
-from pilot.base_modules.meta_data.meta_data import ddl_init_and_upgrade
-
 
 static_file_path = os.path.join(os.getcwd(), "server/static")
 

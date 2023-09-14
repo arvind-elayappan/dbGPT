@@ -4,10 +4,10 @@
 import json
 from typing import Dict
 
-from pilot.commands.exception_not_commands import NotCommands
-from pilot.configs.config import Config
-from pilot.prompts.generator import PluginPromptGenerator
+from .exception_not_commands import NotCommands
+from .generator import PluginPromptGenerator
 
+from pilot.configs.config import Config
 
 def _resolve_pathlike_command_args(command_args):
     if "directory" in command_args and command_args["directory"] in {"", "/"}:

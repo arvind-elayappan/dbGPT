@@ -2,7 +2,7 @@ import signal
 import os
 import threading
 import sys
-from typing import Optional, Any
+from typing import Optional
 from dataclasses import dataclass, field
 
 from pilot.configs.config import Config
@@ -28,7 +28,7 @@ def async_db_summery(system_app: SystemApp):
 
 
 def server_init(args, system_app: SystemApp):
-    from pilot.commands.command_mange import CommandRegistry
+    from pilot.base_modules.agent.commands.command_mange import CommandRegistry
 
     from pilot.common.plugins import scan_plugins
 
@@ -47,8 +47,8 @@ def server_init(args, system_app: SystemApp):
 
     # Loader plugins and commands
     command_categories = [
-        "pilot.commands.built_in.audio_text",
-        "pilot.commands.built_in.image_gen",
+        "pilot.base_modules.agent.commands.built_in.audio_text",
+        "pilot.base_modules.agent.commands.built_in.image_gen",
     ]
     # exclude commands
     command_categories = [
@@ -61,9 +61,9 @@ def server_init(args, system_app: SystemApp):
     cfg.command_registry = command_registry
 
     command_disply_commands = [
-        "pilot.commands.disply_type.show_chart_gen",
-        "pilot.commands.disply_type.show_table_gen",
-        "pilot.commands.disply_type.show_text_gen",
+        "pilot.base_modules.agent.commands.disply_type.show_chart_gen",
+        "pilot.base_modules.agent.commands.disply_type.show_table_gen",
+        "pilot.base_modules.agent.commands.disply_type.show_text_gen",
     ]
     command_disply_registry = CommandRegistry()
     for command in command_disply_commands:
@@ -73,7 +73,6 @@ def server_init(args, system_app: SystemApp):
 
 def _create_model_start_listener(system_app: SystemApp):
     from pilot.connections.manages.connection_manager import ConnectManager
-    from pilot.model.cluster import worker_manager
 
     cfg = Config()
 

@@ -6,7 +6,7 @@ from base64 import b64decode
 import requests
 from PIL import Image
 
-from pilot.commands.command_mange import command
+from pilot.base_modules.agent.commands.command_mange import command
 from pilot.configs.config import Config
 from pilot.logs import logger
 

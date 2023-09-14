@@ -1,7 +1,6 @@
-import pandas as pd
 from pandas import DataFrame
 
-from pilot.commands.command_mange import command
+from pilot.base_modules.agent.commands.command_mange import command
 from pilot.configs.config import Config
 
 from pilot.configs.model_config import LOGDIR
