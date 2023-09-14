@@ -30,7 +30,7 @@ def async_db_summery(system_app: SystemApp):
 def server_init(args, system_app: SystemApp):
     from pilot.base_modules.agent.commands.command_mange import CommandRegistry
 
-    from pilot.common.plugins import scan_plugins
+    from pilot.base_modules.agent.plugins import scan_plugins
 
     # logger.info(f"args: {args}")
 

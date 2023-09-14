@@ -1,5 +1,5 @@
-from .db.my_plugin_db import  MyPluginEntity
-from .db.plugin_hub_db import PluginHubEntity
+from .db.my_plugin_db import  MyPluginEntity, MyPluginDao
+from .db.plugin_hub_db import PluginHubEntity, PluginHubDao
 
 from .commands.command import execute_command, get_command
 from .commands.generator import PluginPromptGenerator

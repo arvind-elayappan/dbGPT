@@ -27,7 +27,7 @@ class MyPluginEntity(Base):
     )
 
 
-class PluginHubDao(BaseDao[MyPluginEntity]):
+class MyPluginDao(BaseDao[MyPluginEntity]):
     def __init__(self):
         super().__init__(
             database="dbgpt", orm_base=Base, db_engine =engine , session= session
