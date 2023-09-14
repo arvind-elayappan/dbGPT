@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 message/
-meta_data/alembic/versions/*.*
+meta_data/alembic/versions/
 meta_data/dbgpt.db
 
 .env
@@ -152,3 +152,5 @@ pilot/mock_datas/db-gpt-test.db.wal
 logswebserver.log.*
 .history/*
 .plugin_env
+/pilot/meta_data/alembic/versions/*
+/pilot/meta_data/*.db
