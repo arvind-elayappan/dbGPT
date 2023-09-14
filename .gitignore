@@ -7,6 +7,8 @@ __pycache__/
 *.so
 
 message/
+meta_data/alembic/versions/*.*
+meta_data/dbgpt.db
 
 .env
 .idea
